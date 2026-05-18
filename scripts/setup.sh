@@ -29,34 +29,45 @@ cat > .claude/project.json << EOF
 EOF
 echo "✓ .claude/project.json"
 
-# Write settings.json (hooks)
-cat > .claude/settings.json << 'EOF'
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/session-stop.sh\""
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/session-start.sh\""
-          }
-        ]
-      }
-    ]
-  }
-}
+# Write or merge settings.json (hooks)
+python3 - << 'EOF'
+import json, os
+
+path = '.claude/settings.json'
+stop_hook = {"type": "command", "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/session-stop.sh\""}
+start_hook = {"type": "command", "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/session-start.sh\""}
+
+if os.path.exists(path):
+    with open(path) as f:
+        settings = json.load(f)
+    hooks = settings.setdefault('hooks', {})
+
+    # Merge Stop hook if not present
+    stop_hooks = hooks.setdefault('Stop', [{'hooks': []}])
+    existing_stop = [h.get('command','') for s in stop_hooks for h in s.get('hooks',[])]
+    if not any('session-stop' in c for c in existing_stop):
+        stop_hooks[0]['hooks'].append(stop_hook)
+
+    # Merge UserPromptSubmit hook if not present
+    submit_hooks = hooks.setdefault('UserPromptSubmit', [{'hooks': []}])
+    existing_submit = [h.get('command','') for s in submit_hooks for h in s.get('hooks',[])]
+    if not any('session-start' in c for c in existing_submit):
+        submit_hooks[0]['hooks'].append(start_hook)
+
+    with open(path, 'w') as f:
+        json.dump(settings, f, indent=2)
+    print("✓ .claude/settings.json (merged)")
+else:
+    settings = {
+        "hooks": {
+            "Stop": [{"hooks": [stop_hook]}],
+            "UserPromptSubmit": [{"hooks": [start_hook]}]
+        }
+    }
+    with open(path, 'w') as f:
+        json.dump(settings, f, indent=2)
+    print("✓ .claude/settings.json (created)")
 EOF
-echo "✓ .claude/settings.json"
 
 # Update CLAUDE.md header
 sed -i '' "s/\[Project Name\]/$PROJECT_NAME/" CLAUDE.md 2>/dev/null || \
