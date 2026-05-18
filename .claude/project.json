@@ -1,0 +1,6 @@
+{
+  "projectName": "My Project",
+  "productionUrl": "https://your-project.vercel.app",
+  "testCommand": "npm run test:coverage",
+  "deployCommand": "vercel --prod"
+}
