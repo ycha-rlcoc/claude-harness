@@ -143,6 +143,26 @@ EOF
   echo "✓ .gitignore"
 fi
 
+
+# Check for API key (subagent/ship mode)
+if [ -f ".env" ]; then
+  echo "✓ .env found"
+elif [ -n "$ANTHROPIC_API_KEY" ]; then
+  echo "✓ ANTHROPIC_API_KEY set in environment"
+else
+  echo "⚠  No ANTHROPIC_API_KEY found — /ship will run in sequential mode."
+  echo "   To enable parallel subagents: copy .env.example to .env and add your key."
+fi
+
+# Check anthropic Python package
+python3 -c "import anthropic" 2>/dev/null && echo "✓ anthropic SDK" || {
+  echo "⚠  anthropic SDK not installed."
+  read -p "   Install now? (needed for /ship API mode) [y/N]: " INSTALL_SDK
+  if [[ "$INSTALL_SDK" =~ ^[Yy]$ ]]; then
+    pip install anthropic && echo "✓ anthropic SDK installed"
+  fi
+}
+
 echo ""
 echo "============================================"
 echo "✅ Automated setup complete."

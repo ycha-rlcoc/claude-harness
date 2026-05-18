@@ -4,5 +4,8 @@
 .claude/event-journal.log
 .claude/transcript.log
 
+# Env
+.env
+
 # OS
 .DS_Store
