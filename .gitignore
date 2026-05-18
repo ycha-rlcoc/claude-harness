@@ -2,6 +2,7 @@
 .claude/session-boundaries.log
 .claude/session-state.json
 .claude/event-journal.log
+.claude/transcript.log
 
 # OS
 .DS_Store

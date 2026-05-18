@@ -138,6 +138,7 @@ if ! grep -q "session-boundaries.log" .gitignore 2>/dev/null; then
 .claude/session-boundaries.log
 .claude/session-state.json
 .claude/event-journal.log
+.claude/transcript.log
 EOF
   echo "✓ .gitignore"
 fi
