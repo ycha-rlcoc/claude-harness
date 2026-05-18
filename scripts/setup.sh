@@ -121,9 +121,9 @@ EOF
 mkdir -p docs/evaluations docs/specs
 echo "✓ docs/evaluations/ docs/specs/"
 
-# Make hooks executable
+# Make hooks and scripts executable
 chmod +x .claude/hooks/*.sh
-chmod +x scripts/post-commit.sh
+chmod +x scripts/*.sh scripts/*.py 2>/dev/null
 echo "✓ hooks executable"
 
 # Install post-commit git hook
