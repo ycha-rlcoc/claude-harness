@@ -52,6 +52,31 @@ if gap > threshold:
     with open(sessions_file, 'a') as f:
         f.write(entry)
 
+    # Archive entries older than 30 days
+    archive_file = os.path.join(project_dir, 'docs', 'sessions-archive.md')
+    if os.path.exists(sessions_file):
+        cutoff = now - (30 * 86400)
+        with open(sessions_file, 'r') as f:
+            content = f.read()
+        sections = content.split('\n## ')
+        header = sections[0]
+        entries = ['\n## ' + s for s in sections[1:]]
+        recent, old = [], []
+        for e in entries:
+            first_line = e.strip().splitlines()[0] if e.strip() else ''
+            try:
+                date_part = first_line.lstrip('#').lstrip().split('—')[0].strip()
+                ts = datetime.strptime(date_part, '%Y-%m-%d %H:%M').timestamp()
+                (old if ts < cutoff else recent).append(e)
+            except Exception:
+                recent.append(e)
+        if old:
+            os.makedirs(os.path.dirname(archive_file), exist_ok=True)
+            with open(archive_file, 'a') as f:
+                f.write(''.join(old))
+            with open(sessions_file, 'w') as f:
+                f.write(header + ''.join(recent))
+
     # Reset session state
     json.dump({'last_active': now, 'session_sha': current_sha}, open(state_file, 'w'))
 

@@ -1,40 +1,44 @@
-# [Project Name] — Claude Code Instructions
+# [Project Name]
 
-## Project overview
+[One-line description.]
 
-[Brief description of what this project does and why it exists.]
+## Read first
+1. `CURRENT.md` — active phase, what's next
+2. `ARCHITECTURE.md` — stack, structure, domain terms
+3. `docs/specs/` — domain specs
+4. `DECISIONS.md` — ADR log
 
-## Key files (read in this order)
+## Diagnostic infra (keep permanently)
+- `<ErrorBoundary>` at app root — on-screen stack + Copy button, stored at `window.__lastError`
+- `<DevPanel>` behind `?debug=1` — nav stack, current screen, last 30 events
+- Smoke tests for golden paths (Playwright)
 
-1. `CURRENT.md` — what's done, what's next, active phase
-2. `ARCHITECTURE.md` — stack, file structure, domain terms, conventions
-3. `docs/specs/` — domain specs (auth, data models, key flows)
-4. `DECISIONS.md` — ADR log, newest first
+## Bug-fix
+1. Hypothesize first — 2–3 causes + distinguishing test before writing code.
+2. Verify locally before deploying.
+3. Commit each working state. Don't batch.
+4. One bug per attempt. Ask for stack trace before reading source.
+
+## Reading
+- Grep before Read. Use offset/limit. Check ARCHITECTURE.md before re-deriving.
+
+## Models
+- Sonnet 4.6 default. Opus 4.7 for 3+ subsystem bugs, hard trade-offs, "is my approach wrong."
+- Haiku 4.5 subagent: search, grep, reads, build/test, git log
+- Sonnet subagent: multi-file research, code review, pattern-based writes
+- Main thread: design calls, synthesis, actual edits, scope. Delegate impl to Sonnet after Opus call.
 
 ## Rules
+- Deploy: foreground only, wait for confirmation before next command.
+- Tables: desktop table + mobile card. No `overflow-x-auto` for mobile.
+- API routes: permission check server-side, not just UI gating.
 
-- Follow all rules in `~/.claude/CLAUDE.md` (global).
-- **Never run the deploy command in the background or in parallel.** Always run it
-  in the foreground and wait for success confirmation before the next command.
-- **All tables use a desktop table + mobile card pattern.** Never use horizontal
-  scroll (`overflow-x-auto`) as the primary mobile strategy for data tables.
-- **Permission check in every API route**, not just UI gating.
+## After a feature ships
+Offer (substantive features only): write/update tests, update `docs/specs/`.
 
-## After completing a feature
-
-When a feature feels complete (meaningful functionality shipped and committed — not a
-typo fix or style tweak), proactively offer both of the following without waiting to be asked:
-
-1. **Write tests** — offer to write or update tests covering the new behavior. Run
-   the test command to confirm existing tests still pass.
-
-2. **Update specs** — offer to update or create the relevant domain spec in `docs/specs/`.
-   Update the **What it does**, **Business rules**, and **Changelog** sections.
-
-Use judgment — don't offer this after minor fixes, only after substantive features.
-
-## Token efficiency (apply every session)
-
-- Sonnet 4.6 — default for all execution
-- Opus 4.7 — only for multi-system architecture, security review, hard tradeoff calls
-- Haiku 4.5 via Explore subagent — file search, grep, "find all X in codebase"
+## Don't
+- Speculative fixes without verification.
+- Escalate scope without consent.
+- Strip diagnostics same turn as shipping.
+- Repeat same fix — fix #2 needs new information.
+- Verbose responses. Short sentences. No preamble.
