@@ -29,6 +29,14 @@ EOF
 sed -i '' "s/\[Project Name\]/$PROJECT_NAME/" CLAUDE.md 2>/dev/null || \
 sed -i "s/\[Project Name\]/$PROJECT_NAME/" CLAUDE.md
 
+# Copy doc templates (only if they don't already exist)
+for tmpl in CURRENT ARCHITECTURE DECISIONS SESSIONS; do
+  if [ ! -f "${tmpl}.md" ] && [ -f "templates/${tmpl}.md" ]; then
+    cp "templates/${tmpl}.md" "${tmpl}.md"
+    echo "✓ Created ${tmpl}.md from template"
+  fi
+done
+
 # Ensure hooks are executable
 chmod +x .claude/hooks/*.sh
 
@@ -45,7 +53,7 @@ echo "✓ Test command:   $TEST_COMMAND"
 echo "✓ Deploy command: $DEPLOY_COMMAND"
 echo ""
 echo "Next steps:"
-echo "  1. Fill in CLAUDE.md with your project's description and rules"
-echo "  2. Create ARCHITECTURE.md, CURRENT.md, DECISIONS.md"
-echo "  3. Copy docs/specs/_template.md to start writing domain specs"
-echo "  4. Run: git init && git add -A && git commit -m 'init: project from claude-harness'"
+echo "  1. Run /init-project in Claude Code — it will interview you and populate"
+echo "     CURRENT.md, ARCHITECTURE.md, DECISIONS.md, and create domain specs"
+echo "  2. Or fill in the templates manually — each section has inline guidance"
+echo "  3. Run: git init && git add -A && git commit -m 'init: project from claude-harness'"
