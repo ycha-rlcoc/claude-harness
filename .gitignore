@@ -1,6 +1,7 @@
 # Claude state files (local only)
 .claude/session-boundaries.log
 .claude/session-state.json
+.claude/event-journal.log
 
 # OS
 .DS_Store

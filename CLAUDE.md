@@ -29,6 +29,7 @@
 - Main thread: design calls, synthesis, actual edits, scope. Delegate impl to Sonnet after Opus call.
 
 ## Rules
+- **Event journal:** For significant decisions (approach choice, library pick, scope deferral), append one line to `.claude/event-journal.log`: `YYYY-MM-DD | [type] | [decision + why]`.
 - Deploy: foreground only, wait for confirmation before next command.
 - Tables: desktop table + mobile card. No `overflow-x-auto` for mobile.
 - API routes: permission check server-side, not just UI gating.

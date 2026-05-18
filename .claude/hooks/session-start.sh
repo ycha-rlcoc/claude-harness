@@ -1,12 +1,9 @@
 #!/bin/bash
-# Runs on every UserPromptSubmit.
-# Detects new session (gap > 30 min), writes git facts to SESSIONS.md,
-# outputs reminder so Claude auto-fills the narrative summary.
 PROJECT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 STATE_FILE="$PROJECT_DIR/.claude/session-state.json"
 SESSIONS_FILE="$PROJECT_DIR/SESSIONS.md"
 NOW=$(date +%s)
-THRESHOLD=1800  # 30 minutes
+THRESHOLD=1800
 
 python3 - "$STATE_FILE" "$SESSIONS_FILE" "$NOW" "$THRESHOLD" "$PROJECT_DIR" << 'EOF'
 import json, os, subprocess, sys
@@ -18,7 +15,6 @@ state_file, sessions_file, now, threshold, project_dir = \
 def git(cmd):
     return subprocess.getoutput(f'git -C {project_dir} {cmd}')
 
-# Initialize state on first run
 if not os.path.exists(state_file):
     sha = git('rev-parse HEAD')
     json.dump({'last_active': now, 'session_sha': sha}, open(state_file, 'w'))
@@ -28,7 +24,6 @@ state = json.load(open(state_file))
 gap = now - state.get('last_active', now)
 
 if gap > threshold:
-    # New session — write previous session facts to SESSIONS.md
     session_sha = state.get('session_sha', '')
     current_sha = git('rev-parse HEAD')
     date_str = datetime.fromtimestamp(state['last_active']).strftime('%Y-%m-%d %H:%M')
@@ -77,20 +72,43 @@ if gap > threshold:
             with open(sessions_file, 'w') as f:
                 f.write(header + ''.join(recent))
 
-    # Reset session state
     json.dump({'last_active': now, 'session_sha': current_sha}, open(state_file, 'w'))
 
-    # Inject reminder into Claude context
-    print(
+    # Build context injection
+    context_parts = [
         f"SESSION SUMMARY NEEDED: {gap // 60} min gap detected. "
-        f"A new entry was added to SESSIONS.md for {date_str} with git facts. "
-        f"Before responding to the user, complete the SESSIONS.md entry: "
-        f"replace '[narrative pending]' with a 2-3 line summary — "
-        f"session goal, key decisions made, key prompts that drove changes. "
+        f"A new entry was added to SESSIONS.md for {date_str}. "
+        f"Fill in '[narrative pending]' before responding: session goal, key decisions, key prompts. "
         f"Then respond normally."
-    )
+    ]
+
+    # Inject recent decisions
+    decisions_file = os.path.join(project_dir, 'DECISIONS.md')
+    if os.path.exists(decisions_file):
+        with open(decisions_file, 'r') as f:
+            dcontent = f.read()
+        recent_decisions = []
+        for block in dcontent.split('\n## ')[1:4]:
+            first_line = block.strip().splitlines()[0] if block.strip() else ''
+            if first_line:
+                recent_decisions.append(f'  - {first_line}')
+        if recent_decisions:
+            context_parts.append('Recent decisions:\n' + '\n'.join(recent_decisions))
+
+    # Inject active spec hint from CURRENT.md
+    current_file = os.path.join(project_dir, 'CURRENT.md')
+    specs_dir = os.path.join(project_dir, 'docs', 'specs')
+    if os.path.exists(current_file) and os.path.isdir(specs_dir):
+        with open(current_file, 'r') as f:
+            current_content = f.read().lower()
+        specs = [f for f in os.listdir(specs_dir) if f.endswith('.md') and not f.startswith('_')]
+        relevant = [s for s in specs if s.replace('.md', '').replace('-', ' ') in current_content]
+        if relevant:
+            context_parts.append(f'Active specs (consider reading): {", ".join(relevant)}')
+
+    print('\n'.join(context_parts))
+
 else:
-    # Same session — update heartbeat only
     state['last_active'] = now
     json.dump(state, open(state_file, 'w'))
 EOF
