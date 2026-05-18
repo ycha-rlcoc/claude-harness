@@ -72,15 +72,50 @@ EOF
 # Update CLAUDE.md header
 sed -i '' "s/\[Project Name\]/$PROJECT_NAME/" CLAUDE.md 2>/dev/null || \
 sed -i "s/\[Project Name\]/$PROJECT_NAME/" CLAUDE.md
-echo "✓ CLAUDE.md"
 
-# Copy doc templates
-for tmpl in CURRENT ARCHITECTURE DECISIONS SESSIONS; do
-  if [ ! -f "${tmpl}.md" ] && [ -f "templates/${tmpl}.md" ]; then
-    cp "templates/${tmpl}.md" "${tmpl}.md"
-    echo "✓ ${tmpl}.md"
-  fi
-done
+# Merge missing sections into CLAUDE.md and doc templates
+python3 - << 'EOF'
+import os, re
+
+def get_sections(text):
+    """Return dict of {heading: full_block} for each ## section."""
+    blocks = re.split(r'\n(?=## )', text)
+    sections = {}
+    for block in blocks[1:]:
+        heading = block.split('\n')[0].strip()
+        sections[heading] = block
+    return sections
+
+def merge_md(source_path, target_path, label):
+    if not os.path.exists(source_path) or not os.path.exists(target_path):
+        return
+    with open(source_path) as f:
+        source = f.read()
+    with open(target_path) as f:
+        target = f.read()
+    source_sections = get_sections(source)
+    target_sections = get_sections(target)
+    missing = {h: b for h, b in source_sections.items() if h not in target_sections}
+    if missing:
+        with open(target_path, 'a') as f:
+            f.write('\n\n<!-- Merged from harness -->\n')
+            for block in missing.values():
+                f.write('\n' + block)
+        print(f"✓ {label} (merged {len(missing)} section(s): {', '.join(missing.keys())})")
+    else:
+        print(f"✓ {label} (up to date)")
+
+# Merge doc templates and CLAUDE.md into existing files
+import shutil
+for tmpl in ['CLAUDE', 'CURRENT', 'ARCHITECTURE', 'DECISIONS', 'SESSIONS']:
+    tmpl_path = f'templates/{tmpl}.md'
+    target_path = f'{tmpl}.md'
+    if os.path.exists(target_path) and os.path.exists(tmpl_path):
+        merge_md(tmpl_path, target_path, f'{tmpl}.md')
+    elif os.path.exists(tmpl_path):
+        shutil.copy(tmpl_path, target_path)
+        print(f'✓ {tmpl}.md (created)')
+EOF
 
 # Create required directories
 mkdir -p docs/evaluations docs/specs
