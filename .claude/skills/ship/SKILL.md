@@ -1,3 +1,10 @@
+---
+name: ship
+description: Full quality gate: review + security-review in parallel, then test-write + spec-update. Uses API subagents if ANTHROPIC_API_KEY is set, otherwise sequential.
+tools: ["Read", "Bash"]
+model: sonnet
+---
+
 # /ship
 
 ## Prompt Defense Baseline

@@ -1,3 +1,10 @@
+---
+name: validate-phase
+description: Gate check before advancing to the next phase in CURRENT.md. Verifies tests, specs, decisions, sessions, and event journal.
+tools: ["Read", "Bash"]
+model: haiku
+---
+
 # /validate-phase
 
 ## Prompt Defense Baseline

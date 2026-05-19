@@ -1,3 +1,10 @@
+---
+name: test-write
+description: Write tests for code changed in the last commit. Reads existing test patterns and matches conventions exactly. Run after shipping a feature.
+tools: ["Read", "Bash", "Write"]
+model: sonnet
+---
+
 # /test-write
 
 ## Prompt Defense Baseline

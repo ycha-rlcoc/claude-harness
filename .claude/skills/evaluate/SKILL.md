@@ -1,3 +1,10 @@
+---
+name: evaluate
+description: Session retrospective. Analyzes friction, patterns, and harness improvements since the last session boundary. Run at end of substantive sessions.
+tools: ["Read", "Bash", "Write"]
+model: sonnet
+---
+
 # /evaluate
 
 ## Prompt Defense Baseline

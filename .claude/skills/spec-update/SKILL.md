@@ -1,3 +1,10 @@
+---
+name: spec-update
+description: Sync docs/specs/ from recent commits. Presents changes before writing. Run after sprint end or feature completion.
+tools: ["Read", "Bash", "Write"]
+model: haiku
+---
+
 # /spec-update
 
 ## Prompt Defense Baseline

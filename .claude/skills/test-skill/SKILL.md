@@ -1,3 +1,10 @@
+---
+name: test-skill
+description: Regression check a skill against its golden spec in docs/skill-tests/. Catches silent breakage when SKILL.md files are edited.
+tools: ["Read", "Glob"]
+model: sonnet
+---
+
 # /test-skill <name>
 
 ## Prompt Defense Baseline

@@ -1,3 +1,10 @@
+---
+name: context-budget
+description: Audit token overhead across skills, commands, and CLAUDE.md. Ranks savings opportunities. Run when adding many new skills or feeling context pressure.
+tools: ["Read", "Bash", "Glob"]
+model: haiku
+---
+
 # /context-budget
 
 ## Prompt Defense Baseline

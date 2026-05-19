@@ -1,3 +1,10 @@
+---
+name: security-review
+description: OWASP Top 10 security scan on changed code. Severity-rated output. Run before any deploy touching auth, API routes, or data access.
+tools: ["Read", "Bash", "Glob"]
+model: haiku
+---
+
 # /security-review
 
 ## Prompt Defense Baseline

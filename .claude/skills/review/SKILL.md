@@ -1,3 +1,10 @@
+---
+name: review
+description: Code review on recent changes. Covers correctness, conventions, and coverage gaps. Pass a commit range or PR number to override default (last commit).
+tools: ["Read", "Bash", "Glob"]
+model: sonnet
+---
+
 # /review
 
 ## Prompt Defense Baseline

@@ -1,3 +1,10 @@
+---
+name: deploy
+description: Sequential test-then-deploy. Use after /ship or when explicitly deploying. Reads testCommand and deployCommand from project.json.
+tools: ["Read", "Bash"]
+model: haiku
+---
+
 # /deploy
 
 ## Prompt Defense Baseline

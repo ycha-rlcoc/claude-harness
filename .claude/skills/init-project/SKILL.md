@@ -1,3 +1,10 @@
+---
+name: init-project
+description: One-time project initialization. Interviews user and generates CURRENT.md, ARCHITECTURE.md, DECISIONS.md, SESSIONS.md, and starter domain specs.
+tools: ["Read", "Write", "Bash"]
+model: sonnet
+---
+
 # /init-project
 
 ## Prompt Defense Baseline

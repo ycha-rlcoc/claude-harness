@@ -3,7 +3,7 @@
 Run a single harness skill as a Claude API subagent.
 Usage: python3 scripts/subagent.py <skill> [--model haiku|sonnet|opus] [--context "..."]
 """
-import argparse, os, subprocess, sys
+import argparse, os, re, subprocess, sys
 import anthropic
 
 MODELS = {
@@ -12,15 +12,17 @@ MODELS = {
     'opus':   'claude-opus-4-7',
 }
 
-# Default model per skill — optimize cost
-SKILL_MODELS = {
-    'review':          'sonnet',
-    'security-review': 'haiku',
-    'test-write':      'sonnet',
-    'spec-update':     'haiku',
-    'evaluate':        'sonnet',
-    'validate-phase':  'haiku',
-}
+def read_skill_frontmatter(skill_name):
+    """Read model from SKILL.md YAML frontmatter. Falls back to 'sonnet'."""
+    path = f'.claude/skills/{skill_name}/SKILL.md'
+    if not os.path.exists(path):
+        return 'sonnet'
+    with open(path) as f:
+        content = f.read()
+    if not content.startswith('---'):
+        return 'sonnet'
+    match = re.search(r'^model:\s*(\S+)', content, re.MULTILINE)
+    return match.group(1).strip() if match else 'sonnet'
 
 def git(cmd):
     return subprocess.getoutput(f'git {cmd}')
@@ -87,5 +89,5 @@ if __name__ == '__main__':
     p.add_argument('--context', default='')
     args = p.parse_args()
 
-    model_key = args.model or SKILL_MODELS.get(args.skill, 'sonnet')
+    model_key = args.model or read_skill_frontmatter(args.skill)
     run(args.skill, model_key, args.context)
