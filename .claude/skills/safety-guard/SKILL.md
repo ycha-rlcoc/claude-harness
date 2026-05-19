@@ -1,6 +1,6 @@
 ---
 name: safety-guard
-description: Documents the safety-guard hook that blocks destructive bash commands (rm -rf, force push, DROP TABLE, etc.) before they execute. Also used to check guard status or explain what was blocked.
+description: Explains what the safety-guard hook blocked and offers a bypass via the # safety-guard: confirmed comment. Invoke manually after seeing a blocked command message.
 tools: ["Read", "Bash"]
 model: haiku
 ---

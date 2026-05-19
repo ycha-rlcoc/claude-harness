@@ -9,6 +9,7 @@
 ## Reading
 - Grep before Read. Use offset/limit.
 - Check ARCHITECTURE.md before re-deriving from source.
+- When working from a diff or error output, read only the changed/affected files and immediate context — do not read the whole codebase.
 
 ## Skill recommendations (proactive)
 
@@ -27,6 +28,9 @@ Suggest the right skill before the user has to ask. One short line, not a lectur
 | After adding 3+ new skills | `/rules-distill` then `/skill-stocktake` |
 | New project from harness template | `bash scripts/setup.sh` then `/init-project` |
 | About to do destructive action (rm, force push, DROP) | Confirm intent; safety-guard hook will intercept |
+
+## Output
+- Present proposed changes, fixes, and actions one at a time with explicit approve/deny (yes / no / stop). Never batch multiple changes in a single approval prompt.
 
 ## Don't
 - Speculative fixes without verification.

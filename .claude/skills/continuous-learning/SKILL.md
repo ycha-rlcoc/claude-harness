@@ -1,6 +1,6 @@
 ---
 name: continuous-learning
-description: Extract atomic "instincts" from this session — small observed behaviors with confidence scores. Promotes high-confidence instincts to rules/ or skills/. Project-scoped so portal patterns don't bleed into other projects. Manual (skill-only) version — no background hooks, zero ongoing cost.
+description: Extract atomic session instincts — small observed behaviors with confidence scores. Run at session end, before /evaluate. Counterpart to /learn which codifies patterns from multiple evaluation reports.
 tools: ["Read", "Write", "Glob"]
 model: haiku
 ---
