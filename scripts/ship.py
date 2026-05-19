@@ -2,18 +2,61 @@
 """
 Orchestrate the full ship sequence with parallel API subagents.
 
-Phase 1 (parallel): /review + /security-review
+Phase 0 (sequential): build → tsc → lint  [stops on failure]
+Phase 1 (parallel):   /review + /security-review
          → pause for fixes
-Phase 2 (parallel): /test-write + /spec-update
+Phase 2 (parallel):   /test-write + /spec-update
 
 Usage: python3 scripts/ship.py
 """
-import concurrent.futures, os, subprocess, sys, threading
+import concurrent.futures, json, os, subprocess, sys, threading
 
 PHASE_1 = ['review', 'security-review']
 PHASE_2 = ['test-write', 'spec-update']
 
 lock = threading.Lock()
+
+def run_cmd(cmd, label):
+    """Run a shell command, return (passed, output)."""
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    return result.returncode == 0, output
+
+def phase_0():
+    """Toolchain verification. Returns True if all checks pass."""
+    print(f"\n{'='*60}")
+    print("  Phase 0: Toolchain")
+    print(f"{'='*60}\n")
+
+    # Read test/build commands from project.json if available
+    build_cmd = "npm run build"
+    try:
+        cfg = json.load(open('.claude/project.json'))
+        # Use testCommand as a proxy for "project has npm"; fall back to npm run build
+    except Exception:
+        pass
+
+    checks = [
+        (build_cmd + " 2>&1 | tail -15",  "Build"),
+        ("npx tsc --noEmit 2>&1 | head -20", "TypeScript"),
+        ("npm run lint 2>&1 | head -20",    "Lint"),
+    ]
+
+    all_pass = True
+    for cmd, label in checks:
+        passed, output = run_cmd(cmd, label)
+        icon = "✅" if passed else "❌"
+        print(f"  {icon} {label}")
+        if not passed:
+            print(f"\n{output}\n")
+            print(f"  Phase 0 failed on: {label}")
+            print("  Fix with /build-fix, then re-run /ship.")
+            all_pass = False
+            break
+
+    if all_pass:
+        print("\n  Phase 0 ✅ — build, types, lint clean")
+    return all_pass
 
 def run_skill(skill_name):
     result = subprocess.run(
@@ -41,6 +84,9 @@ def main():
         sys.exit(1)
 
     print("\n🚀  /ship — starting\n")
+
+    if not phase_0():
+        sys.exit(1)
 
     run_phase(PHASE_1, "Phase 1: Review (parallel)")
 

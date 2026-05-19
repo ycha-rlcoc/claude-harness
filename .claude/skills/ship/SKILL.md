@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Full quality gate: review + security-review in parallel, then test-write + spec-update. Uses API subagents if ANTHROPIC_API_KEY is set, otherwise sequential.
+description: Full quality gate: toolchain verification, then review + security-review in parallel, then test-write + spec-update. Uses API subagents if ANTHROPIC_API_KEY is set, otherwise sequential.
 tools: ["Read", "Bash"]
 model: sonnet
 ---
@@ -31,6 +31,22 @@ Follow the sequence below manually.
 ---
 
 ## Sequence
+
+### Phase 0 — Toolchain (always sequential, must pass before anything else)
+
+Run in order. **Stop immediately if any step fails** — do not proceed to Phase 1.
+
+```bash
+npm run build 2>&1 | tail -10        # build must pass
+npx tsc --noEmit 2>&1 | head -20     # no type errors
+npm run lint 2>&1 | head -20         # no lint errors (skip if not configured)
+```
+
+If a step fails: report the error, suggest `/build-fix`, and stop. Do not run review on broken code.
+
+If all pass: report `Phase 0 ✅ — build, types, lint clean` and continue.
+
+---
 
 ### Phase 1 — Review (run in parallel if API mode)
 Run both simultaneously:
