@@ -41,6 +41,9 @@
 
 - `src/path/to/file.tsx` — [one-line purpose]
 
+> Add a `// Spec: docs/specs/<this-file>.md` comment to the top of the primary
+> source file above, so code links back to this spec (reciprocal of this list).
+
 ---
 
 ## Related specs

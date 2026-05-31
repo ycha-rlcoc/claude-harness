@@ -10,6 +10,11 @@
 - Grep before Read. Use offset/limit.
 - Check ARCHITECTURE.md before re-deriving from source.
 - When working from a diff or error output, read only the changed/affected files and immediate context — do not read the whole codebase.
+- **Follow spec pointers.** A top-of-file `// Spec: docs/specs/<name>.md` comment means the business rules for that code live in the named spec. Read it before changing the logic — don't re-derive intent from the code alone.
+
+## Specs ↔ code linkage
+- Each domain spec's primary source file carries a top-of-file `// Spec: docs/specs/<name>.md` comment. This keeps business rules one hop away when reading code, and is the reciprocal of the spec's own "Key files" section.
+- When you create a domain spec, add the pointer comment to its primary source file. When you move the logic, move the pointer.
 
 ## Skill recommendations (proactive)
 
