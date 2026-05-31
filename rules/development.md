@@ -22,6 +22,11 @@ These keep change blast-radius small — which is also what keeps an AI's per-ch
 - **Generalize the mechanism instead of special-casing.** When a fix adds a special case on top of shared infrastructure, that is a signal the underlying mechanism isn't deep enough. Prefer extending the shared mechanism (a helper, a config entry) over layering conditionals — special cases compound.
 - **Name things so grep finds them.** Consistent, predictable names make a file's location guessable without reading the tree.
 
+## Input validation & observability
+
+- **Validate every request body with a schema before touching it.** Never trust `req.json()` raw — use a Zod schema (or equivalent) and a `parseBody()` helper that returns a structured 400 on failure. See `templates/validate.ts` + `templates/schemas.ts`. Key gotchas: (a) use `isoDate` refine to prevent `new Date("invalid")` silently writing NaN; (b) use `max(N)` on bulk-import arrays to prevent DoS; (c) reject unknown enum values — don't silently default; (d) Zod v4 enforces RFC 4122 UUID variant bits, so test fixtures must be real v4 UUIDs.
+- **Log errors structurally, never silently.** Every catch block must emit a structured log line (level, message, context). Never log PHI — strip patient-identifying fields before logging (see `templates/logger.ts`). Never log stack traces — they can contain variable values from sensitive call frames. Prefer logging `error.message` over the full Error object.
+
 ## Verification
 - **Run locally what CI runs, before pushing.** Each CI stage should have a local script equivalent (unit, integration, e2e) that works against the test DB. A 3-minute CI round-trip to discover a failure you could have caught in seconds locally is wasted — and for an AI it also burns a full read of the CI logs. Discover failures at the cheapest layer.
 
