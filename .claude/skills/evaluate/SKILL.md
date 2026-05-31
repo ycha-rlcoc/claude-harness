@@ -26,6 +26,7 @@ Read `.claude/session-boundaries.log` for session window (default: last 24h). Sk
    - Patterns — conventions to codify in CLAUDE.md or specs
    - Missing context — what had to be looked up that a doc should answer
    - Harness candidates — manual work that could be a hook/skill
+   - Global rules — which learnings are universal enough to add to `~/.claude/CLAUDE.md` for all future projects (not just this one)
 
 3. **Write** `docs/evaluations/YYYY-MM-DD.md` (append if exists):
 ```

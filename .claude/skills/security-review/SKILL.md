@@ -39,6 +39,7 @@ Or a specified range/PR.
 - Role/permission checks on server side (not just UI)
 - JWT verification — algorithm, expiry, signature check
 - Password handling — hashing, no plaintext logging
+- **Sibling audit** — when a security pattern appears in the diff (e.g. a role guard, a permission check), check all sibling files of the same type for the same gap. A fix in one place often reveals it was missed elsewhere.
 
 **Sensitive data (A02)**
 - Secrets, API keys, tokens hardcoded or logged
