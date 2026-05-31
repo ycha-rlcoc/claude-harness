@@ -52,6 +52,37 @@ Merges missing `##` sections into existing docs, adds session hooks to existing 
 
 ---
 
+## Automations (zero extra commands)
+
+These run without any action from you once set up by `setup.sh`:
+
+| Trigger | What happens |
+|---|---|
+| `git commit` | post-commit hook reminds to update FEATURES.md if new page/route files were added |
+| `git push` | pre-push hook runs `npm test` + `check-features.sh` — blocks the push if either fails |
+| Claude edits a file | PostToolUse hook surfaces any FEATURES.md gaps immediately |
+| Claude Code session ends | session-stop auto-runs `/evaluate` if ≥3 commits and ≥15 min |
+
+**PostToolUse hook** — add to `.claude/settings.json`:
+```json
+"PostToolUse": [{
+  "matcher": "Write|Edit",
+  "hooks": [{"type": "command",
+    "command": "bash \"$(git rev-parse --show-toplevel)/scripts/check-features.sh\" 2>/dev/null | grep '❌' || true"
+  }]
+}]
+```
+
+**Auto-evaluate** — add to bottom of `.claude/hooks/session-stop.sh`:
+```bash
+COMMIT_COUNT=$(git log --oneline --since="24 hours ago" 2>/dev/null | wc -l | tr -d ' ')
+if [ "$COMMIT_COUNT" -ge 3 ]; then
+  claude -p "/evaluate" 2>/dev/null &   # no API key needed — uses session auth
+fi
+```
+
+---
+
 ## Day-to-day commands
 
 | Moment | Command |
