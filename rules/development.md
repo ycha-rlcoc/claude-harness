@@ -38,3 +38,15 @@ Suggest the right skill before the user has to ask. One short line, not a lectur
 - Strip diagnostics same turn as shipping.
 - Repeat same fix — fix #2 needs new information.
 - Verbose responses. Short sentences. No preamble.
+
+## Auth & security
+
+- **Every section/layout must enforce authorization independently from the API layer.** Route middleware typically only checks authentication (logged in) — not authorization (role). Any layout, middleware, or route group that gates access to a section must check the user's role and redirect/reject before rendering or returning data. API-level 403s are necessary but not sufficient — the UI layer can expose sensitive structure before the API check fires.
+- **Write security contracts as tests before implementation** — use `/tdd`. Role checks, permission denials, and required audit entries are correctness requirements, not implementation details. Write the failing test first so they can't be omitted.
+- **Sibling file audit after a security fix.** When a security pattern is added to one file (e.g. a role guard to one layout), immediately check all sibling files of the same type for the same gap. A fix in one place often reveals the same issue was missed elsewhere.
+
+## E2E testing
+
+- **Never use bare `getByText()` on data-heavy pages.** User-generated content (names, IDs, dynamic labels) will substring-match UI chrome. Use `getByRole` with `exact`, `href` attribute selectors, or `data-testid` for any element whose label might appear in data rows.
+- **Scope test projects explicitly.** Each test project/suite must declare an explicit include pattern for the specs it owns. An exclude-only approach silently runs unintended specs under the wrong user context.
+- **Truncate before seeding in E2E global-setup.** If the test DB was branched from another environment (Neon, PlanetScale, etc.), it inherits row data. Seed files using upsert by unique key will fail with constraint errors. Always truncate before seeding.
