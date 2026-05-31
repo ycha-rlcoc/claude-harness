@@ -103,6 +103,35 @@ python3 scripts/subagent.py security-review --model sonnet
 
 ---
 
+## Contributing back to the harness
+
+The harness compounds in value when every project feeds learnings back into it. The loop:
+
+```
+Session ends → /evaluate → identify universal learnings
+                         → update ~/.claude/CLAUDE.md (global rules)
+                         → PR to ycha-rlcoc/claude-harness (skills/rules/templates)
+                         → merge → bash sync-skills.sh in workspace
+```
+
+**What belongs in the harness:**
+- Rules that apply to any project — auth patterns, testing discipline, output conventions
+- Skill improvements — a check you wish `/security-review` had run, a step `/evaluate` missed
+- Templates — CI pipelines, config files, setup patterns with gotchas baked in as comments
+
+**What stays in the project:**
+- Stack-specific rules (platform deploy quirks, component patterns, compliance requirements)
+- Project-specific docs (`CURRENT.md`, `DECISIONS.md`, `docs/specs/`)
+
+**After merging a harness PR:**
+```bash
+bash sync-skills.sh   # pulls updated skills into all workspace projects
+```
+
+**`~/.claude/CLAUDE.md`** — create this file to hold global rules that apply across every project regardless of harness version. The harness `rules/` directory is per-project; `~/.claude/CLAUDE.md` is per-machine. Good candidates: model selection habits, output style preferences, universal security rules.
+
+---
+
 ## All skills
 
 | Skill | Purpose |
