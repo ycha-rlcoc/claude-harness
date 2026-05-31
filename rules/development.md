@@ -16,6 +16,15 @@
 - Each domain spec's primary source file carries a top-of-file `// Spec: docs/specs/<name>.md` comment. This keeps business rules one hop away when reading code, and is the reciprocal of the spec's own "Key files" section.
 - When you create a domain spec, add the pointer comment to its primary source file. When you move the logic, move the pointer.
 
+## Structure & maintainability
+These keep change blast-radius small — which is also what keeps an AI's per-change token cost low (fewer files to read, fewer to edit, less intent to re-derive).
+- **Centralize cross-cutting values (the 3+ rule).** Any constant, mapping, or type referenced in 3+ places goes in one module that the call sites import. A scattered value means every change reads and edits N files and risks missing one; a centralized one is a single edit. Watch for it in routing tables, role/permission maps, status enums, and config.
+- **Generalize the mechanism instead of special-casing.** When a fix adds a special case on top of shared infrastructure, that is a signal the underlying mechanism isn't deep enough. Prefer extending the shared mechanism (a helper, a config entry) over layering conditionals — special cases compound.
+- **Name things so grep finds them.** Consistent, predictable names make a file's location guessable without reading the tree.
+
+## Verification
+- **Run locally what CI runs, before pushing.** Each CI stage should have a local script equivalent (unit, integration, e2e) that works against the test DB. A 3-minute CI round-trip to discover a failure you could have caught in seconds locally is wasted — and for an AI it also burns a full read of the CI logs. Discover failures at the cheapest layer.
+
 ## Skill recommendations (proactive)
 
 Suggest the right skill before the user has to ask. One short line, not a lecture.
@@ -29,6 +38,7 @@ Suggest the right skill before the user has to ask. One short line, not a lectur
 | First session in a repo / returning after a break | `/onboard` |
 | Planning work spanning multiple sessions or PRs | `/blueprint` |
 | Session ending with substantial work done | `/evaluate` |
+| CLAUDE.md / rules have grown over several sessions | `/context-budget` — trim always-on context |
 | Something wrong with harness setup | `/workspace-audit` |
 | After adding 3+ new skills | `/rules-distill` then `/skill-stocktake` |
 | New project from harness template | `bash scripts/setup.sh` then `/init-project` |

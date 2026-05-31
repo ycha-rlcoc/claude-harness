@@ -10,6 +10,12 @@
 #
 # Required GitHub Secrets:
 #   DATABASE_URL_TEST — connection string for an isolated test database branch
+#
+# Run locally what CI runs (catch failures before the push, not after a 3-min
+# round-trip). Every stage below maps to a local script:
+#   npm run test:coverage      # unit job
+#   npm run test:integration   # integration job (needs DATABASE_URL_TEST in .env)
+#   npm run test:e2e           # e2e job (needs DATABASE_URL_TEST in .env)
 
 name: CI
 
