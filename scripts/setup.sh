@@ -4,6 +4,8 @@
 
 set -e
 
+HARNESS_REPO="ycha-rlcoc/claude-harness"
+
 echo "Claude Harness Setup"
 echo "===================="
 echo ""
@@ -143,6 +145,33 @@ EOF
   echo "✓ .gitignore"
 fi
 
+
+# Sync any skills added to the harness after this project was initialized.
+# GitHub template snapshots are frozen at clone time — new skills added to
+# the harness repo later won't appear unless synced explicitly. This step
+# closes that gap automatically at setup time using the gh CLI.
+echo "Syncing skills from harness..."
+if command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1; then
+  SKILL_ADDED=0
+  while IFS= read -r skill; do
+    if [ ! -f ".claude/skills/$skill/SKILL.md" ]; then
+      mkdir -p ".claude/skills/$skill"
+      content=$(gh api "repos/$HARNESS_REPO/contents/.claude/skills/$skill/SKILL.md" --jq '.content' 2>/dev/null)
+      if [ -n "$content" ]; then
+        printf '%s' "$content" | base64 -d > ".claude/skills/$skill/SKILL.md"
+        cmd=$(gh api "repos/$HARNESS_REPO/contents/.claude/commands/$skill.md" --jq '.content' 2>/dev/null)
+        [ -n "$cmd" ] && { mkdir -p .claude/commands; printf '%s' "$cmd" | base64 -d > ".claude/commands/$skill.md"; }
+        echo "  + $skill"
+        SKILL_ADDED=$((SKILL_ADDED + 1))
+      fi
+    fi
+  done < <(gh api "repos/$HARNESS_REPO/contents/.claude/skills" --jq '.[].name' 2>/dev/null)
+  [ "$SKILL_ADDED" -eq 0 ] && echo "✓ All skills present" || echo "✓ $SKILL_ADDED skill(s) added from harness"
+else
+  echo "⚠  gh CLI not available or not authenticated — skill sync skipped"
+  echo "   To sync manually later: bash <harness-dir>/scripts/sync-skills.sh ."
+fi
+echo ""
 
 # Check for API key (subagent/ship mode)
 if [ -f ".env" ]; then

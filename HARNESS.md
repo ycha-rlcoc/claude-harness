@@ -12,7 +12,7 @@ cd my-project
 ```bash
 bash scripts/setup.sh
 ```
-Prompts for project name, URL, test/deploy commands. Writes `settings.json`, installs post-commit hook, creates `docs/` dirs, merges missing sections into existing files.
+Prompts for project name, URL, test/deploy commands. Writes `settings.json`, installs post-commit hook, creates `docs/` dirs, merges missing sections into existing files. Also syncs any skills added to the harness after the template snapshot — so you always start with the full skill set.
 
 **3. Manual steps (prompted by setup.sh):**
 - Reload VSCode: `Cmd+Shift+P` → Developer: Reload Window
