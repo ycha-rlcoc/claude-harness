@@ -54,6 +54,12 @@ Suggest the right skill before the user has to ask. One short line, not a lectur
 - Repeat same fix — fix #2 needs new information.
 - Verbose responses. Short sentences. No preamble.
 
+## Dependency & env security
+
+- **Scan dependencies in CI.** Add `npm audit --audit-level=high` (or equivalent) to the CI pipeline. Unfixable upstream vulnerabilities should be documented with a suppression comment — don't ignore them silently. Enable Dependabot or Renovate for automated update PRs.
+- **Validate env vars at startup.** Create an `env.ts` (or equivalent) that parses all required environment variables with a schema (Zod, etc.) at module load time. A missing var should throw with a clear message before the app starts — not fail silently on the first API call that needs it. See `templates/env.ts`. Test by adding baseline values to `test.env` in the test config, not `beforeEach` stubs (which can't fire before module-level imports).
+- **Add security headers.** Every HTTP response should include at minimum: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`, `Referrer-Policy`, and a `Content-Security-Policy`. See `templates/next.config.headers.ts` for a Next.js starter. Adjust CSP to match your auth and API providers before going to production.
+
 ## Auth & security
 
 - **Every section/layout must enforce authorization independently from the API layer.** Route middleware typically only checks authentication (logged in) — not authorization (role). Any layout, middleware, or route group that gates access to a section must check the user's role and redirect/reject before rendering or returning data. API-level 403s are necessary but not sufficient — the UI layer can expose sensitive structure before the API check fires.

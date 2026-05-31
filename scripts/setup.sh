@@ -128,11 +128,17 @@ chmod +x .claude/hooks/*.sh
 chmod +x scripts/*.sh scripts/*.py 2>/dev/null
 echo "✓ hooks executable"
 
-# Install post-commit git hook
+# Install git hooks
 mkdir -p .git/hooks
 cp scripts/post-commit.sh .git/hooks/post-commit
 chmod +x .git/hooks/post-commit
 echo "✓ post-commit hook installed"
+
+if [ -f "scripts/pre-push.sh" ]; then
+  cp scripts/pre-push.sh .git/hooks/pre-push
+  chmod +x .git/hooks/pre-push
+  echo "✓ pre-push hook installed (runs tests + check-features before every push)"
+fi
 
 # Update .gitignore
 if ! grep -q "session-boundaries.log" .gitignore 2>/dev/null; then
