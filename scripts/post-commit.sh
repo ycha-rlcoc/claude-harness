@@ -1,13 +1,15 @@
 #!/bin/bash
-# Post-commit: runs tests if testCommand is set in .claude/project.json
-PROJECT_JSON="$(git rev-parse --show-toplevel)/.claude/project.json"
-if [ ! -f "$PROJECT_JSON" ]; then exit 0; fi
+# Post-commit hook: reminds to update FEATURES.md when new pages or routes are added.
+# Installed to .git/hooks/post-commit by scripts/setup.sh
 
-TEST_CMD=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get('testCommand',''))" "$PROJECT_JSON" 2>/dev/null)
-if [ -z "$TEST_CMD" ]; then exit 0; fi
+new_routes=$(git diff HEAD~1 HEAD --name-only --diff-filter=A 2>/dev/null \
+  | grep -E "(page|route)\.tsx?$" \
+  | grep -v "__tests__\|\.test\.\|\.spec\.")
 
-echo "→ Running tests: $TEST_CMD"
-eval "$TEST_CMD"
-if [ $? -ne 0 ]; then
-  echo "⚠️  Tests failed after commit. Fix before pushing."
+if [ -n "$new_routes" ]; then
+  echo ""
+  echo "⚠  New page/route files committed — update FEATURES.md:"
+  echo "$new_routes" | sed 's/^/    /'
+  echo "   Run /spec-update or add rows manually."
+  echo ""
 fi
