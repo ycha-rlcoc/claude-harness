@@ -22,6 +22,12 @@ These keep change blast-radius small — which is also what keeps an AI's per-ch
 - **Generalize the mechanism instead of special-casing.** When a fix adds a special case on top of shared infrastructure, that is a signal the underlying mechanism isn't deep enough. Prefer extending the shared mechanism (a helper, a config entry) over layering conditionals — special cases compound.
 - **Name things so grep finds them.** Consistent, predictable names make a file's location guessable without reading the tree.
 
+## Integration testing
+
+- **Use `globalSetup` to redirect DATABASE_URL before workers fork.** When integration tests use a separate test DB branch, any Prisma singleton imported by the code under test will connect to the wrong DB unless DATABASE_URL is set before the worker process starts. `setupFiles` run after module imports are hoisted — too late for singleton initialization. Use `globalSetup` + dotenv to set `DATABASE_URL = DATABASE_URL_TEST` before workers fork. See `templates/e2e/integration-global-setup.ts`.
+- **Scope `afterEach` to tables that need per-test isolation only.** An `afterEach` that truncates tables managed by another file's `beforeAll` causes cross-file interference when vitest runs files concurrently in singleFork mode. Truncate only the tables whose rows must not leak between individual tests (e.g. AuditLog, event queues). Let each test file manage its own domain data in file-level `beforeAll`/`afterAll`.
+- **Ratchet coverage thresholds after a backfill.** After closing coverage gaps, update thresholds to match current actuals (not aspirational targets). Set them 1-2 points below actuals so CI catches regressions without blocking new features that temporarily lower coverage. Repeat after each backfill sprint.
+
 ## Input validation & observability
 
 - **Validate every request body with a schema before touching it.** Never trust `req.json()` raw — use a Zod schema (or equivalent) and a `parseBody()` helper that returns a structured 400 on failure. See `templates/validate.ts` + `templates/schemas.ts`. Key gotchas: (a) use `isoDate` refine to prevent `new Date("invalid")` silently writing NaN; (b) use `max(N)` on bulk-import arrays to prevent DoS; (c) reject unknown enum values — don't silently default; (d) Zod v4 enforces RFC 4122 UUID variant bits, so test fixtures must be real v4 UUIDs.
